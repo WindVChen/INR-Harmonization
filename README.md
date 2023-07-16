@@ -17,13 +17,15 @@ This repository is the official implementation of *HINet*. If you encounter any 
 
 ## Updates
 
-[**07/16/2023**] Code is initially public.
+[**07/17/2023**] Pretrained weights have been released. Feel free to try that!👋👋
+
+[**07/16/2023**] The code is initially public. 🥳
 
 [**03/06/2023**] Source code and pretrained models will be publicly accessible.
 
 ## TODO
 - [x] Initial code release.
-- [ ] Add pretrained model weights.
+- [x] Add pretrained model weights.
 - [ ] Add the efficient splitting strategy for inferencing on original resolution images.
 
 ## Table of Contents
@@ -78,20 +80,38 @@ High-resolution (HR) image harmonization is of great significance in real-world 
       IHD_train.txt
    ```
 
-   - Before training we resize HAdobe5k subdataset so that each side is smaller than 2048. This is for quick data loading. The resizing script can refer to [resize_hdataset.ipynb](https://github.com/SamsungLabs/image_harmonization/blob/master/notebooks/resize_hdataset.ipynb).
+   - Before training we resize HAdobe5k subdataset so that each side is smaller than 1024. This is for quick data loading. The resizing script can refer to [resize_Adobe.py](tools/resize_Adobe.py).
    
    - For training or evaluating on the original resolution of iHarmony4 dataset. Please newly create a `HAdobe5kori` directory with the original HAdobe5k images in it.
 
+   - If you want to train and evaluate only on HAdobe5k subdataset (see Table 1 in the paper), you can modify the `IHD_train.txt` and `IHD_test.txt` in [train.py](train.py) to only contain the HAdobe5k images.
+
 3. Pre-trained Models
    - We adopt [HRNetV2](https://github.com/HRNet/HRNet-Image-Classification) as our encoder, you can download the weight from [here](https://onedrive.live.com/?authkey=%21AMkPimlmClRvmpw&id=F7FD0B7F26543CEB%21112&cid=F7FD0B7F26543CEB&parId=root&parQt=sharedby&parCid=C8304F01C1A85932&o=OneUp) and save the weight in `pretrained_models` directory.
-   - In the following table, we provide some model weights pretrained under different resolutions: 
+   - In the following table, we provide several model weights pretrained under different resolutions (Correspond to Table 1 in the paper): 
+
+|                      Download Link                       |                         Model Descriptions                          |
+|:--------------------------------------------------------:|:-------------------------------------------------------------------:|
+| [Resolution_RAW_iHarmony4.pth][Resolution_RAW_iHarmony4] |  Train by RSC strategy with original resolution iHarmony4 dataset   |
+| [Resolution_256_iHarmony4.pth][Resolution_256_iHarmony4] |           Train with 256*256 resolution iHarmony4 dataset           |
+|  [Resolution_RAW_HAdobe5K.pth][Resolution_RAW_HAdobe5K]  | Train by RSC strategy with original resolution HAdobe5k subdataset  |
+| [Resolution_2048_HAdobe5K.pth][Resolution_2048_HAdobe5K] | Train by RSC strategy with 2048*2048 resolution HAdobe5k subdataset |
+| [Resolution_1024_HAdobe5K.pth][Resolution_1024_HAdobe5K] | Train by RSC strategy with 1024*1024 resolution HAdobe5k subdataset |
+
+[Resolution_RAW_iHarmony4]: https://drive.google.com/file/d/1O9faWNk54mIzMaGZ1tmgm0EJpH20a-Fl/view?usp=drive_link
+[Resolution_256_iHarmony4]: https://drive.google.com/file/d/1xym96LTP9a75UseDWGW2KRN1gyl3HPyM/view?usp=sharing
+[Resolution_RAW_HAdobe5K]: https://drive.google.com/file/d/1JeUS5inuOM0pASKfu-tK9K7E5pGkP570/view?usp=drive_link
+[Resolution_2048_HAdobe5K]: https://drive.google.com/file/d/18RxTfZsPEoi6kSS_UVEsUBYRBHAl4MfB/view?usp=drive_link
+[Resolution_1024_HAdobe5K]: https://drive.google.com/file/d/1cOY74mN8gIz66watyoobZ1knrigkQyb5/view?usp=sharing
 
 ## Training
+
+The intermediate output (including checkpoint, visualization, log.txt) will be saved in directory `logs/exp`.
 
 ### Train in low resolution (LR) mode
 
 ```bash
-python train.py --dataset_path {dataset_path} --base_size 256 --input_size 256 --INR_input_size 256 --hr_train False --isFullRes False
+python train.py --dataset_path {dataset_path} --base_size 256 --input_size 256 --INR_input_size 256
 ```
 - `dataset_path`: the path of the iHarmony4 dataset.
 - `base_size`: the size of the input image to encoder.
@@ -104,38 +124,42 @@ python train.py --dataset_path {dataset_path} --base_size 256 --input_size 256 -
 
 ### Train in high resolution (HR) mode (E.g, 2048x2048)
 
-If not use RSC strategy, the training command is as follows:
+If **not use RSC strategy**, the training command is as follows: (For a single RTX 3090, it will lead to out-of-memory even `batch_size` is set to 2.)
 ```bash
-python train.py --dataset_path {dataset_path} --base_size 256 --input_size 2048 --INR_input_size 2048 --hr_train False --isFullRes False
+python train.py --dataset_path {dataset_path} --base_size 256 --input_size 2048 --INR_input_size 2048
 ```
 
-If use RSC strategy, the training command is as follows:
+If **use RSC strategy**, the training command is as follows: (For a single RTX 3090, `batch_size` can set up to 6.)
 ```bash
-python train.py --dataset_path {dataset_path} --base_size 256 --input_size 2048 --INR_input_size 2048 --hr_train True --isFullRes False
+python train.py --dataset_path {dataset_path} --base_size 256 --input_size 2048 --INR_input_size 2048 --hr_train
 ```
 
 ### Train in original resolution mode
 ```bash
-python train.py --dataset_path {dataset_path} --base_size 256 --hr_train True --isFullRes True
+python train.py --dataset_path {dataset_path} --base_size 256 --hr_train --isFullRes
 ```
 
 ## Evaluation
 
+The intermediate output (including visualizations, log.txt) will be saved in directory `logs/test`.
+
+**Notice:** Due to the resolution-agnostic characteristic of INR, you can inference images at any resolution not matter which resolution the model is trained on. Please refer to Table 4 and Table 5 in the paper. 
+
 ### Evaluation in low resolution (LR) mode
 
 ```bash
-python inference.py --dataset_path {dataset_path} --base_size 256 --input_size 256 --INR_input_size 256 --hr_train False --isFullRes False
+python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weight} --base_size 256 --input_size 256 --INR_input_size 256
 ```
 
 ### Evaluation in high resolution (HR) mode (E.g, 2048x2048)
 
 ```bash
-python inference.py --dataset_path {dataset_path} --base_size 256 --input_size 2048 --INR_input_size 2048 --isFullRes False
+python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weight} --base_size 256 --input_size 2048 --INR_input_size 2048
 ```
 
 ### Train in original resolution mode
 ```bash
-python inference.py --dataset_path {dataset_path} --base_size 256 --hr_train True --isFullRes True
+python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weight} --base_size 256 --hr_train --isFullRes
 ```
 
 ## Results

@@ -4,7 +4,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 max_size = 1024
-input_dataset_path = r'G:\Datasets\Images Harmonization\iHarmony4\HAdobe5k'
+input_dataset_path = r'.\iHarmony4\HAdobe5k'
 output_path = f'{input_dataset_path}_resized{max_size}'
 
 input_dataset_path = Path(input_dataset_path)

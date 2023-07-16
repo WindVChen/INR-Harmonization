@@ -18,10 +18,10 @@ from utils import misc, metrics
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--workers', type=int, default=8,
+    parser.add_argument('--workers', type=int, default=1,
                         metavar='N', help='Dataloader threads.')
 
-    parser.add_argument('--batch_size', type=int, default=16,
+    parser.add_argument('--batch_size', type=int, default=1,
                         help='You can override model batch size by specify positive number.')
 
     parser.add_argument('--device', type=str, default='cuda',
@@ -30,11 +30,8 @@ def parse_args():
     parser.add_argument('--save_path', type=str, default="./logs",
                         help='Where to save logs and checkpoints.')
 
-    parser.add_argument('--dataset_path', type=str, default=r"G:\Datasets\Images Harmonization\iHarmony4",
+    parser.add_argument('--dataset_path', type=str, default=r".\iHarmony4",
                         help='Dataset path.')
-
-    parser.add_argument('--print_freq', type=int, default=100,
-                        help='Number of iterations then print.')
 
     parser.add_argument('--base_size', type=int, default=256,
                         help='Base size. Resolution of the image input into the Encoder')
@@ -56,7 +53,7 @@ def parse_args():
                         help='INR activation layer type: leakyrelu_pe, sine')
 
     parser.add_argument('--pretrained', type=str,
-                        default=r'G:\ComputerPrograms\Image_Harmonization\Supervised_Harmonization\logs\exp1\best.pth',
+                        default=r'.\pretrained_models\Resolution_RAW_iHarmony4.pth',
                         help='Pretrained weight path')
 
     parser.add_argument('--param_factorize_dim', type=int,
@@ -72,21 +69,17 @@ def parse_args():
                         default='adamw',
                         help='Which optimizer to use.')
 
-    parser.add_argument('--INRDecode', type=bool,
-                        default=True,
+    parser.add_argument('--INRDecode', action="store_false",
                         help='Whether INR decoder. Set it to False if you want to test the baseline '
                              '(https://github.com/SamsungLabs/image_harmonization)')
 
-    parser.add_argument('--isMoreINRInput', type=bool,
-                        default=True,
+    parser.add_argument('--isMoreINRInput', action="store_false",
                         help='Whether to cat RGB and mask. See Section 3.4 in the paper.')
 
-    parser.add_argument('--hr_train', type=bool,
-                        default=False,
+    parser.add_argument('--hr_train', action="store_true",
                         help='Whether use hr_train. See section 3.4 in the paper.')
 
-    parser.add_argument('--isFullRes', type=bool,
-                        default=False,
+    parser.add_argument('--isFullRes', action="store_true",
                         help='Whether for original resolution. See section 3.4 in the paper.')
 
     opt = parser.parse_args()
@@ -123,14 +116,13 @@ def inference(val_loader, model, logger, opt):
         category = batch['category']
 
         fg_INR_coordinates = batch['fg_INR_coordinates'].to(opt.device)
-        bg_INR_coordinates = batch['bg_INR_coordinates'].to(opt.device)
 
         with torch.no_grad():
-            fg_reconstruct, bg_reconstruct, fg_content_bg_appearance_construct, _, lut_transform_image = model(
+            fg_content_bg_appearance_construct, _, lut_transform_image = model(
                 composite_image,
                 mask,
                 fg_INR_coordinates,
-                bg_INR_coordinates)
+                )
 
         if opt.INRDecode:
             pred_fg_image = fg_content_bg_appearance_construct[-1]
@@ -229,7 +221,11 @@ def main_process(opt):
     model = build_model(opt).to(opt.device)
     logger.info(f"Load pretrained weight from {opt.pretrained}")
 
-    model.load_state_dict(torch.load(opt.pretrained)['model'])
+    load_dict = torch.load(opt.pretrained)['model']
+    for k in load_dict.keys():
+        if k not in model.state_dict().keys():
+            print(f"Skip {k}")
+    model.load_state_dict(load_dict, strict=False)
 
     inference(val_loader, model, logger, opt)
 

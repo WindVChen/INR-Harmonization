@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument('--save_path', type=str, default="./logs",
                         help='Where to save logs and checkpoints.')
 
-    parser.add_argument('--dataset_path', type=str, default=r"G:\Datasets\Images Harmonization\iHarmony4",
+    parser.add_argument('--dataset_path', type=str, default=r".\iHarmony4",
                         help='Dataset path.')
 
     parser.add_argument('--print_freq', type=int, default=100,
@@ -78,21 +78,17 @@ def parse_args():
                         default='adamw',
                         help='Which optimizer to use.')
 
-    parser.add_argument('--INRDecode', type=bool,
-                        default=True,
+    parser.add_argument('--INRDecode', action="store_false",
                         help='Whether INR decoder. Set it to False if you want to test the baseline '
                              '(https://github.com/SamsungLabs/image_harmonization)')
 
-    parser.add_argument('--isMoreINRInput', type=bool,
-                        default=True,
+    parser.add_argument('--isMoreINRInput', action="store_false",
                         help='Whether to cat RGB and mask. See Section 3.4 in the paper.')
 
-    parser.add_argument('--hr_train', type=bool,
-                        default=False,
+    parser.add_argument('--hr_train', action="store_true",
                         help='Whether use hr_train. See section 3.4 in the paper.')
 
-    parser.add_argument('--isFullRes', type=bool,
-                        default=False,
+    parser.add_argument('--isFullRes', action="store_true",
                         help='Whether for original resolution. See section 3.4 in the paper.')
 
     opt = parser.parse_args()
