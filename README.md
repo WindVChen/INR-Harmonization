@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1><a href="https://arxiv.org/abs/2303.01681">Dense Pixel-to-Pixel Harmonization via Continuous Image Representation</a></h1>
+<h1><a href="https://arxiv.org/abs/2303.01681">Dense Pixel-to-Pixel Harmonization via <br /> Continuous Image Representation</a></h1>
 
 **[Jianqi Chen](https://windvchen.github.io/), [Yilan Zhang](https://scholar.google.com.hk/citations?hl=en&user=wZ4M4ecAAAAJ), [Zhengxia Zou](https://scholar.google.com.hk/citations?hl=en&user=DzwoyZsAAAAJ), [Keyan Chen](https://scholar.google.com.hk/citations?hl=en&user=5RF4ia8AAAAJ), and [Zhenwei Shi](https://scholar.google.com.hk/citations?hl=en&user=kNhFWQIAAAAJ)**
 
@@ -17,7 +17,7 @@ This repository is the official implementation of *HINet*. If you encounter any 
 
 ## Updates
 
-[**07/18/2023**] Check out our new work [**Diff-Harmonization**](https://arxiv.org/abs/2307.08182), which is a **Zero-Shot Harmonization** method based on *Diffusion Models*!😊
+[**07/18/2023**] Check out our new work [***Diff-Harmonization***](https://github.com/WindVChen/Diff-Harmonization), which is a **Zero-Shot Harmonization** method based on *Diffusion Models*!😊
 
 [**07/17/2023**] Pretrained weights have been released. Feel free to try that!👋👋
 
@@ -33,19 +33,19 @@ This repository is the official implementation of *HINet*. If you encounter any 
 
 ## Table of Contents
 
-- [Abstract](#Abstract)
-- [Requirements](#Requirements)
-- [Training](#Training)
-  - [Train in low resolution (LR) mode](#Train-in-low-resolution-(LR)-mode)
-  - [Train in high resolution (HR) mode](#Train-in-high-resolution-(HR)-mode-(E.g,-2048x2048))
-  - [Train in original resolution mode](#Train-in-original-resolution-mode)
-- [Evaluation](#Evaluation)
-  - [Inference in low resolution (LR) mode](#Inference-in-low-resolution-(LR)-mode)
-  - [Inference in high resolution (HR) mode](#Inference-in-high-resolution-(HR)-mode-(E.g,-2048x2048))
-  - [Inference in original resolution mode](#Inference-in-original-resolution-mode)
-- [Results](#Results)
-- [Citation & Acknowledgments](#Citation-&-Acknowledgments)
-- [License](#License)
+- [Abstract](#abstract)
+- [Requirements](#requirements)
+- [Training](#training)
+  - [Train in low resolution (LR) mode](#train-in-low-resolution--lr--mode)
+  - [Train in high resolution (HR) mode](#train-in-high-resolution--hr--mode--eg-2048x2048-)
+  - [Train in original resolution mode](#train-in-original-resolution-mode)
+- [Evaluation](#evaluation)
+  - [Evaluation in low resolution (LR) mode](#evaluation-in-low-resolution--lr--mode)
+  - [Evaluation in high resolution (HR) mode](#evaluation-in-high-resolution--hr--mode--eg-2048x2048-)
+  - [Evaluation in original resolution mode](#evaluation-in-original-resolution-mode)
+- [Results](#results)
+- [Citation & Acknowledgments](#citation--acknowledgments)
+- [License](#license)
 
 
 ## Abstract
@@ -160,7 +160,7 @@ python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weigh
 python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weight} --base_size 256 --input_size 2048 --INR_input_size 2048
 ```
 
-### Train in original resolution mode
+### Evaluation in original resolution mode
 ```bash
 python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weight} --base_size 256 --hr_train --isFullRes
 ```
