@@ -17,6 +17,8 @@ This repository is the official implementation of *HINet*. If you encounter any 
 
 ## Updates
 
+[**07/18/2023**] Check out our new work [**Diff-Harmonization**](https://arxiv.org/abs/2307.08182), which is a **Zero-Shot Harmonization** method based on *Diffusion Models*!😊
+
 [**07/17/2023**] Pretrained weights have been released. Feel free to try that!👋👋
 
 [**07/16/2023**] The code is initially public. 🥳
@@ -27,6 +29,7 @@ This repository is the official implementation of *HINet*. If you encounter any 
 - [x] Initial code release.
 - [x] Add pretrained model weights.
 - [ ] Add the efficient splitting strategy for inferencing on original resolution images.
+- [ ] Add Gradio demo.
 
 ## Table of Contents
 
@@ -47,7 +50,7 @@ This repository is the official implementation of *HINet*. If you encounter any 
 
 ## Abstract
 
-![DiffAttack's framework](assets/network.png)
+![HINet's framework](assets/network.png)
 
 High-resolution (HR) image harmonization is of great significance in real-world applications such as image synthesis and image editing. However, due to the high memory costs, existing dense pixel-to-pixel harmonization methods are mainly focusing on processing low-resolution (LR) images. Some recent works resort to combining with color-to-color transformations but are either limited to certain resolutions or heavily depend on hand-crafted image filters. In this work, we explore leveraging the implicit neural representation (INR) and propose a novel ***image Harmonization method based on Implicit neural Networks (HINet)***, which to the best of our knowledge, is ***the first dense pixel-to-pixel method applicable to HR images without any hand-crafted filter design***.  Inspired by the Retinex theory, we decouple the MLPs into two parts to respectively capture the content and environment of composite images. A Low-Resolution Image Prior (LRIP) network is designed to alleviate the Boundary Inconsistency problem, and we also propose new designs for the training and inference process. Extensive experiments have demonstrated the effectiveness of our method compared with state-of-the-art methods. Furthermore, some interesting and practical applications of the proposed method are explored.
 
