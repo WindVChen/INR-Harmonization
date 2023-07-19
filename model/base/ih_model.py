@@ -2,7 +2,7 @@ import torch
 import torchvision
 import torch.nn as nn
 
-from .conv_autoencoder import ConvEncoder, DeconvDecoder, INRDecoder, onlyVector, onlyMatrix, onlyLastLayer
+from .conv_autoencoder import ConvEncoder, DeconvDecoder, INRDecoder
 
 from .ops import ScaleLayer
 
@@ -28,8 +28,8 @@ class IHModelWithBackbone(nn.Module):
             ScaleLayer(init_value=0.1, lr_mult=1)
         )
 
-    def forward(self, image, mask, coord=None):
-        if self.opt.INRDecode and self.opt.hr_train and self.training:
+    def forward(self, image, mask, coord=None, start_proportion=None):
+        if self.opt.INRDecode and self.opt.hr_train and (self.training or hasattr(self.opt, 'split_num') or hasattr(self.opt, 'split_resolution')):
             backbone_image = torchvision.transforms.Resize([self.opt.base_size, self.opt.base_size])(image[0])
             backbone_mask = torch.cat(
                 (torchvision.transforms.Resize([self.opt.base_size, self.opt.base_size])(mask[0]),
@@ -42,7 +42,7 @@ class IHModelWithBackbone(nn.Module):
         backbone_mask_features = self.mask_conv(backbone_mask[:, :1])
         backbone_features = self.backbone(backbone_image, backbone_mask, backbone_mask_features)
 
-        output = self.model(image, mask, backbone_features, coord=coord)
+        output = self.model(image, mask, backbone_features, coord=coord, start_proportion=start_proportion)
         return output
 
 
@@ -67,15 +67,12 @@ class DeepImageHarmonization(nn.Module):
         if opt.INRDecode:
             "See Table 2 in the paper to test with different INR decoders' structures."
             self.decoder = INRDecoder(depth, self.encoder.blocks_channels, norm_layer, opt, backbone_from)
-            # self.decoder = onlyLastLayer(depth, self.encoder.blocks_channels, norm_layer, opt, backbone_from)
-            # self.decoder = onlyVector(depth, self.encoder.blocks_channels, norm_layer, opt, backbone_from)
-            # self.decoder = onlyMatrix(depth, self.encoder.blocks_channels, norm_layer, opt, backbone_from)
         else:
             "Baseline: https://github.com/SamsungLabs/image_harmonization"
             self.decoder = DeconvDecoder(depth, self.encoder.blocks_channels, norm_layer, attend_from, image_fusion)
 
-    def forward(self, image, mask, backbone_features=None, coord=None):
-        if self.opt.INRDecode and self.opt.hr_train and self.training:
+    def forward(self, image, mask, backbone_features=None, coord=None, start_proportion=None):
+        if self.opt.INRDecode and self.opt.hr_train and (self.training or hasattr(self.opt, 'split_num') or hasattr(self.opt, 'split_resolution')):
             x = torch.cat((torchvision.transforms.Resize([self.opt.base_size, self.opt.base_size])(image[0]),
                            torchvision.transforms.Resize([self.opt.base_size, self.opt.base_size])(mask[0])), dim=1)
         else:
@@ -84,8 +81,8 @@ class DeepImageHarmonization(nn.Module):
 
         intermediates = self.encoder(x, backbone_features)
 
-        if self.opt.INRDecode and self.opt.hr_train and self.training:
-            output = self.decoder(intermediates, image[1], mask[1], coord_samples=coord)
+        if self.opt.INRDecode and self.opt.hr_train and (self.training or hasattr(self.opt, 'split_num') or hasattr(self.opt, 'split_resolution')):
+            output = self.decoder(intermediates, image[1], mask[1], coord_samples=coord, start_proportion=start_proportion)
         else:
             output = self.decoder(intermediates, image, mask)
         return output
