@@ -168,7 +168,7 @@ applications of the proposed method are explored.
 
 ## Visualization GUI
 
-We provide a GUI based on Gradio for visualizing the intermediate results of our method. You can run the following command to start it locally, or make use of our provided [Huggingface Space]().
+We provide a GUI based on Gradio for visualizing the intermediate results of our method. You can run the following command to start it locally, or make use of our provided [Huggingface Space](https://huggingface.co/spaces/WindVChen/INR-Harmon).
 ```bash
 python app.py
 ```
