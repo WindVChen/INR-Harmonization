@@ -26,16 +26,18 @@ import math
 
 
 class single_image_dataset(torch.utils.data.Dataset):
-    def __init__(self, opt):
+    def __init__(self, opt, composite_image=None, mask=None):
         super().__init__()
 
         self.opt = opt
 
-        composite_image = cv2.imread(opt.composite_image)
-        composite_image = cv2.cvtColor(composite_image, cv2.COLOR_BGR2RGB)
+        if composite_image is None:
+            composite_image = cv2.imread(opt.composite_image)
+            composite_image = cv2.cvtColor(composite_image, cv2.COLOR_BGR2RGB)
         self.composite_image = composite_image
 
-        mask = cv2.imread(opt.mask)
+        if mask is None:
+            mask = cv2.imread(opt.mask)
         mask = mask[:, :, 0].astype(np.float32) / 255.
         self.mask = mask
 
@@ -237,14 +239,14 @@ def parse_args():
     return opt
 
 @torch.no_grad()
-def inference(model, opt):
+def inference(model, opt, composite_image=None, mask=None):
     model.eval()
 
     "dataset here is actually consisted of several patches of a single image."
-    singledataset = single_image_dataset(opt)
+    singledataset = single_image_dataset(opt, composite_image, mask)
 
     single_data_loader = DataLoader(singledataset, opt.batch_size, shuffle=False, drop_last=False, pin_memory=True,
-                                    num_workers=opt.workers, persistent_workers=True)
+                                    num_workers=opt.workers, persistent_workers=False if composite_image is not None else True)
 
     "Init a pure black image with the same size as the input image."
     init_img = np.zeros_like(singledataset.composite_image)
@@ -269,25 +271,27 @@ def inference(model, opt):
                     mask,
                     fg_INR_coordinates,
                 )
-
-            torch.cuda.reset_max_memory_allocated()
-            torch.cuda.reset_max_memory_cached()
-            start_time = time.time()
-            torch.cuda.synchronize()
+            if opt.device == "cuda":
+                torch.cuda.reset_max_memory_allocated()
+                torch.cuda.reset_max_memory_cached()
+                start_time = time.time()
+                torch.cuda.synchronize()
             fg_content_bg_appearance_construct, _, lut_transform_image = model(
                 composite_image,
                 mask,
                 fg_INR_coordinates,
             )
-            torch.cuda.synchronize()
-            end_time = time.time()
+            if opt.device == "cuda":
+                torch.cuda.synchronize()
+                end_time = time.time()
 
-            end_max_memory = torch.cuda.max_memory_allocated() // 1024 ** 2
-            end_memory = torch.cuda.memory_allocated() // 1024 ** 2
+                end_max_memory = torch.cuda.max_memory_allocated() // 1024 ** 2
+                end_memory = torch.cuda.memory_allocated() // 1024 ** 2
 
-            print(f'GPU max memory usage: {end_max_memory} MB')
-            print(f'GPU memory usage: {end_memory} MB')
-            time_all += (end_time - start_time)
+                print(f'GPU max memory usage: {end_max_memory} MB')
+                print(f'GPU memory usage: {end_memory} MB')
+                time_all += (end_time - start_time)
+            print(f'progress: {step} / {len(single_data_loader)}')
         except:
             raise Exception(
                 f'The image resolution is large. Please increase the `split_num` value. Your current set is {opt.split_num}')
@@ -304,14 +308,15 @@ def inference(model, opt):
 
             init_img[start_points[id][0]:start_points[id][0] + singledataset.split_height_resolution,
             start_points[id][1]:start_points[id][1] + singledataset.split_width_resolution] = pred_harmonized_tmp
-            cv2.imwrite(os.path.join(opt.save_path, "pred_harmonized_image.jpg"), init_img)
 
     print(f'Inference time: {time_all}')
-    os.makedirs(opt.save_path, exist_ok=True)
-    cv2.imwrite(os.path.join(opt.save_path, "pred_harmonized_image.jpg"), init_img)
+    if opt.save_path is not None:
+        os.makedirs(opt.save_path, exist_ok=True)
+        cv2.imwrite(os.path.join(opt.save_path, "pred_harmonized_image.jpg"), init_img)
+    return init_img
 
 
-def main_process(opt):
+def main_process(opt, composite_image=None, mask=None):
     cudnn.benchmark = True
 
     model = build_model(opt).to(opt.device)
@@ -322,7 +327,7 @@ def main_process(opt):
             print(f"Skip {k}")
     model.load_state_dict(load_dict, strict=False)
 
-    inference(model, opt)
+    return inference(model, opt, composite_image, mask)
 
 
 if __name__ == '__main__':

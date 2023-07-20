@@ -10,23 +10,30 @@ and [Zhenwei Shi](https://scholar.google.com.hk/citations?hl=en&user=kNhFWQIAAAA
 ![GitHub stars](https://badgen.net/github/stars/windvchen/INR-Harmonization)
 [![](https://img.shields.io/badge/license-Apache--2.0-blue)](#License)
 [![](https://img.shields.io/badge/arXiv-2303.01681-b31b1b.svg)](https://arxiv.org/abs/2303.01681)
+<a href="https://huggingface.co/spaces/WindVChen/INR-Harmon"><img alt="Huggingface" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-INR Harmonization-orange"></a>
 
 </div>
 
 <p align = "center">    
-<img  src="assets/title_harmon.gif"/ width="150">
-<img  src="assets/title_any_image.gif"/ width="150">
-<img  src="assets/title_you_want.gif"/ width="150">
+<img  src="assets/title_harmon.gif"/ width="200">
+<img  src="assets/title_any_image.gif"/ width="200">
+<img  src="assets/title_you_want.gif"/ width="200">
 </p>
+
+<div align="center">
+<img src="assets/demo.gif" width="600">
+</div>
 
 
 ### Share us a :star: if this repo does help
 
-This repository is the official implementation of *HINet*, which can achieve ***Arbitrary aspect ratio & Arbitrary resolution*** image harmonization. If you encounter any question, please feel free to contact
+This repository is the official implementation of ***HINet (or INR-Harmonization)***, which can achieve ***Arbitrary aspect ratio & Arbitrary resolution*** image harmonization. If you encounter any question, please feel free to contact
 us. You can create an issue or just send email to me windvchen@gmail.com. Also welcome for any idea exchange and
 discussion.
 
 ## Updates
+
+[**07/21/2023**] We achieve that!🎉🎉 With all **TODOs** complete! Try here for our [Huggingface Demo]()!! You can also download this repository, and run the GUI locally (refer to [cmd] here)!🥳🥳
 
 [**07/19/2023**] Hi everyone! We have added two new inference
 scripts: [efficient_inference_for_square_image.py](efficient_inference_for_square_image.py) where you can achieve quite
@@ -34,7 +41,7 @@ fast speed on harmonizing a ***square image***!
 And [inference_for_arbitrary_resolution_image.py](inference_for_arbitrary_resolution_image.py) where you can harmonize
 any resolution image ***(2K, 4k, 8k, JUST WHATEVER YOU WANT!!)***. Please check them out!😉😉
 
-A summary of features of different inference strategies (More information please refer to [Inference](#inference)]):
+A summary of features of different inference strategies (More information please refer to [Inference](#inference)):
 
 |        Features         | [efficient_inference_for_square_image.py](efficient_inference_for_square_image.py) |         [inference_for_arbitrary_resolution_image.py](inference_for_arbitrary_resolution_image.py)          |
 |:-----------------------:|:----------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------:|
@@ -56,7 +63,7 @@ which is a **Zero-Shot Harmonization** method based on *Diffusion Models*!😊
 - [x] Initial code release.
 - [x] Add pretrained model weights.
 - [x] Add the efficient splitting strategy for inferencing on original resolution images.
-- [ ] Add Gradio demo.
+- [x] Add Gradio demo.
 
 ## Table of Contents
 
@@ -158,6 +165,13 @@ applications of the proposed method are explored.
 [Resolution_2048_HAdobe5K]: https://drive.google.com/file/d/18RxTfZsPEoi6kSS_UVEsUBYRBHAl4MfB/view?usp=drive_link
 
 [Resolution_1024_HAdobe5K]: https://drive.google.com/file/d/1cOY74mN8gIz66watyoobZ1knrigkQyb5/view?usp=sharing
+
+## Visualization GUI
+
+We provide a GUI based on Gradio for visualizing the intermediate results of our method. You can run the following command to start it locally, or make use of our provided [Huggingface Space]().
+```bash
+python app.py
+```
 
 ## Training
 
