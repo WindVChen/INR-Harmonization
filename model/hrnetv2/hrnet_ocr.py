@@ -394,7 +394,7 @@ class HighResolutionNet(nn.Module):
         pretrained_dict = {k: v for k, v in pretrained_dict.items()
                            if k in model_dict.keys()}
 
-        print(f'Loaded {len(pretrained_dict)} of {params_count} pretrained parameters for HRNet')
+        # print(f'Loaded {len(pretrained_dict)} of {params_count} pretrained parameters for HRNet')
 
         model_dict.update(pretrained_dict)
         self.load_state_dict(model_dict)

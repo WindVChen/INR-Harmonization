@@ -276,6 +276,8 @@ def inference(model, opt, composite_image=None, mask=None):
                     mask,
                     fg_INR_coordinates,
                 )
+                print("Ready for harmonization...")
+
             if opt.device == "cuda":
                 torch.cuda.reset_max_memory_allocated()
                 torch.cuda.reset_max_memory_cached()
@@ -325,12 +327,11 @@ def inference(model, opt, composite_image=None, mask=None):
 def main_process(opt, composite_image=None, mask=None):
     cudnn.benchmark = True
 
+    print("Preparing model...")
     model = build_model(opt).to(opt.device)
 
     load_dict = torch.load(opt.pretrained, map_location='cpu')['model']
-    for k in load_dict.keys():
-        if k not in model.state_dict().keys():
-            print(f"Skip {k}")
+
     model.load_state_dict(load_dict, strict=False)
 
     return inference(model, opt, composite_image, mask)

@@ -6,7 +6,6 @@ import gradio as gr
 import numpy as np
 import sys
 import io
-import torch
 
 
 class Logger:
@@ -38,7 +37,7 @@ def read_logs():
     return out
 
 
-with gr.Blocks() as app:
+with gr.Blocks(css=".output-image, .input-image, .image-preview {height: 600px !important}") as app:
     gr.Markdown("""
 # HINet (or INR-Harmonization) - A novel image Harmonization method based on Implicit neural Networks
 ## Harmonize any image you want! Arbitrary resolution, and arbitrary aspect ratio! 
@@ -48,6 +47,16 @@ with gr.Blocks() as app:
 <img style="margin-bottom: 0em;display: inline;margin-top: -.25em;" src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a> for no queue on your own hardware.</p>
 * Official Repo: [INR-Harmonization](https://github.com/WindVChen/INR-Harmonization)
 """)
+
+    gr.Markdown("""
+            ## Quick Start
+            1. Select desired `Pretrained Model`.
+            2. Select a composite image, and then a mask with the same size.
+            3. Select the inference mode (for non-square image, only `Arbitrary Image` support). Also note that `Square Image` mode will be much faster than `Arbitrary Image` mode.
+            4. Set `Split Resolution` (Patches' resolution) or `Split Number` (How many patches, about N*N) according to the inference mode.
+            3. Click `Start` and enjoy it!
+
+            """)
 
     valid_checkpoints_dict = {"Resolution_256_iHarmony4": "Resolution_256_iHarmony4.pth",
                               "Resolution_1024_HAdobe5K": "Resolution_1024_HAdobe5K.pth",
@@ -61,13 +70,12 @@ with gr.Blocks() as app:
     })
     with gr.Row():
         with gr.Column():
-            form_composite_image = gr.Image(label='Input Composite image', type='pil').style(height="auto")
-            gr.Examples(examples=[os.path.join("demo", i) for i in os.listdir("demo") if "composite" in i],
+            form_composite_image = gr.Image(label='Input Composite image', type='pil').style(height=512)
+            gr.Examples(examples=sorted([os.path.join("demo", i) for i in os.listdir("demo") if "composite" in i]),
                         label="Composite Examples", inputs=form_composite_image, cache_examples=False)
         with gr.Column():
-            form_mask_image = gr.Image(label='Input Mask image', type='pil', interactive=False).style(
-                height="auto")
-            gr.Examples(examples=[os.path.join("demo", i) for i in os.listdir("demo") if "mask" in i],
+            form_mask_image = gr.Image(label='Input Mask image', type='pil', interactive=False).style(height=512)
+            gr.Examples(examples=sorted([os.path.join("demo", i) for i in os.listdir("demo") if "mask" in i]),
                         label="Mask Examples", inputs=form_mask_image, cache_examples=False)
     with gr.Row():
         with gr.Column(scale=4):
@@ -109,15 +117,14 @@ with gr.Blocks() as app:
                         label="Split Resolution",
                     )
                     form_split_num = gr.Number(
-                        value=8,
+                        value=2,
                         interactive=False,
                         label="Split Number")
             with gr.Row():
                 form_log = gr.Textbox(read_logs, label="Logs", interactive=False, type="text", every=1)
 
         with gr.Column(scale=4):
-            form_harmonized_image = gr.Image(label='Harmonized Result', type='numpy', interactive=False).style(
-                height="auto")
+            form_harmonized_image = gr.Image(label='Harmonized Result', type='numpy', interactive=False).style(height=512)
             form_start_btn = gr.Button("Start Harmonization", interactive=False)
             form_reset_btn = gr.Button("Reset", interactive=True)
             form_stop_btn = gr.Button("Stop", interactive=True)
@@ -126,7 +133,7 @@ with gr.Blocks() as app:
     def on_change_form_composite_image(form_composite_image):
         if form_composite_image is None:
             return gr.update(interactive=False, value=None), gr.update(value=None)
-        return gr.update(interactive=True), gr.update(value=None)
+        return gr.update(interactive=True, value=None), gr.update(value=None)
 
 
     def on_change_form_mask_image(form_composite_image, form_mask_image):
@@ -141,15 +148,15 @@ with gr.Blocks() as app:
             w, h = form_composite_image.size[:2]
             if h != w or (h % 16 != 0):
                 return gr.update(value='Arbitrary Image', interactive=False), gr.update(interactive=True), gr.update(
-                    interactive=True), gr.update(interactive=True), gr.update(interactive=False,
-                                                                              value=-1), gr.update(value=None)
+                    interactive=True), gr.update(interactive=True, visible=True), gr.update(interactive=False,
+                                                                              value=-1, visible=False), gr.update(value=None)
             else:
                 return gr.update(value='Square Image', interactive=True), gr.update(interactive=True), gr.update(
-                    interactive=True), gr.update(interactive=False), gr.update(interactive=True,
-                                                                               value=h // 16,
+                    interactive=True), gr.update(interactive=False, visible=False), gr.update(interactive=True,
+                                                                               value=h // 2,
                                                                                maximum=h,
                                                                                minimum=h // 16,
-                                                                               step=h // 16), gr.update(value=None)
+                                                                               step=h // 16, visible=True), gr.update(value=None)
 
 
     form_composite_image.change(
@@ -185,9 +192,9 @@ with gr.Blocks() as app:
 
     def on_change_form_inference_mode(form_inference_mode):
         if form_inference_mode == "Square Image":
-            return gr.update(interactive=True), gr.update(interactive=False)
+            return gr.update(interactive=True, visible=True), gr.update(interactive=False, visible=False)
         else:
-            return gr.update(interactive=False), gr.update(interactive=True)
+            return gr.update(interactive=False, visible=False), gr.update(interactive=True, visible=True)
 
 
     form_inference_mode.change(on_change_form_inference_mode, inputs=[form_inference_mode],
@@ -197,6 +204,7 @@ with gr.Blocks() as app:
     def on_click_form_start_btn(form_composite_image, form_mask_image, form_pretrained_dropdown, form_inference_mode,
                                 form_split_res, form_split_num):
         log.log = io.BytesIO()
+        print(f"Harmonizing image with {form_composite_image.size[1]}*{form_composite_image.size[0]}...")
         if form_inference_mode == "Square Image":
             from efficient_inference_for_square_image import parse_args, main_process, global_state
             global_state[0] = 1
@@ -287,15 +295,6 @@ with gr.Blocks() as app:
                         inputs=[form_inference_mode],
                         outputs=[form_log, form_composite_image, form_mask_image, form_start_btn], cancels=generate)
 
-    gr.Markdown("""
-        ## Quick Start
-        1. Select desired `Pretrained Model`.
-        2. Select a composite image, and then a mask with the same size.
-        3. Select the inference mode (for non-square image, only `Arbitrary Image` support).
-        4. Set `Split Resolution` (Patches' resolution) or `Split Number` (How many patches, about N*N) according to the inference mode.
-        3. Click `Start` and enjoy it!
-
-        """)
     gr.HTML("""
         <style>
             .container {
