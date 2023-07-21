@@ -33,7 +33,7 @@ discussion.
 
 ## Updates
 
-[**07/21/2023**] We achieve that!🎉🎉 With all **TODOs** complete! Try here for our [Huggingface Demo]()!! You can also download this repository, and run the GUI locally (refer to [cmd] here)!🥳🥳
+[**07/21/2023**] We achieve that!🎉🎉 With all **TODOs** complete! Try here for our [Huggingface Demo](https://huggingface.co/spaces/WindVChen/INR-Harmon)!! You can also download this repository, and run the GUI locally (refer to [cmd](#visualization-gui) here)!🥳🥳
 
 [**07/19/2023**] Hi everyone! We have added two new inference
 scripts: [efficient_inference_for_square_image.py](efficient_inference_for_square_image.py) where you can achieve quite
@@ -67,6 +67,7 @@ which is a **Zero-Shot Harmonization** method based on *Diffusion Models*!😊
 
 ## Table of Contents
 
+- [Visualization GUI](#Visualization-GUI)
 - [Abstract](#abstract)
 - [Requirements](#requirements)
 - [Training](#training)
@@ -83,6 +84,14 @@ which is a **Zero-Shot Harmonization** method based on *Diffusion Models*!😊
 - [Results](#results)
 - [Citation & Acknowledgments](#citation--acknowledgments)
 - [License](#license)
+
+
+## Visualization GUI
+
+We provide a GUI based on Gradio for visualizing the intermediate results of our method. You can run the following command to start it locally, or make use of our provided [Huggingface Space](https://huggingface.co/spaces/WindVChen/INR-Harmon).
+```bash
+python app.py
+```
 
 ## Abstract
 
@@ -166,12 +175,6 @@ applications of the proposed method are explored.
 
 [Resolution_1024_HAdobe5K]: https://drive.google.com/file/d/1cOY74mN8gIz66watyoobZ1knrigkQyb5/view?usp=sharing
 
-## Visualization GUI
-
-We provide a GUI based on Gradio for visualizing the intermediate results of our method. You can run the following command to start it locally, or make use of our provided [Huggingface Space](https://huggingface.co/spaces/WindVChen/INR-Harmon).
-```bash
-python app.py
-```
 
 ## Training
 
