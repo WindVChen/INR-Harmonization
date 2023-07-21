@@ -327,7 +327,7 @@ def main_process(opt, composite_image=None, mask=None):
 
     model = build_model(opt).to(opt.device)
 
-    load_dict = torch.load(opt.pretrained)['model']
+    load_dict = torch.load(opt.pretrained, map_location='cpu')['model']
     for k in load_dict.keys():
         if k not in model.state_dict().keys():
             print(f"Skip {k}")
