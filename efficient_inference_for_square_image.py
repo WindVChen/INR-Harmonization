@@ -24,6 +24,7 @@ from utils.misc import normalize
 
 import math
 
+global_state = [1]  # For Gradio Stop Button.
 
 class single_image_dataset(torch.utils.data.Dataset):
     def __init__(self, opt, composite_image=None, mask=None):
@@ -273,6 +274,10 @@ def inference(model, opt, composite_image=None, mask=None):
         fg_INR_coordinates = coordinate_map[1:]
 
         try:
+            if global_state[0] == 0:
+                print("Stop Harmonizing...!")
+                break
+
             if step == 0:  # This is for CUDA Kernel Warm-up, or the first inference step will be quite slow.
                 fg_content_bg_appearance_construct, _, lut_transform_image = model(
                     composite_image,
@@ -317,7 +322,8 @@ def inference(model, opt, composite_image=None, mask=None):
             init_img[start_points[id][0]:start_points[id][0] + singledataset.split_height_resolution,
             start_points[id][1]:start_points[id][1] + singledataset.split_width_resolution] = pred_harmonized_tmp
 
-    print(f'Inference time: {time_all}')
+    if opt.device == "cuda":
+        print(f'Inference time: {time_all}')
     if opt.save_path is not None:
         os.makedirs(opt.save_path, exist_ok=True)
         cv2.imwrite(os.path.join(opt.save_path, "pred_harmonized_image.jpg"), init_img)

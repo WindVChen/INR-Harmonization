@@ -29,6 +29,7 @@ class Logger:
 log = Logger()
 sys.stdout = log
 
+
 def read_logs():
     out = log.log.getvalue().decode()
     if out.count("\n") >= 30:
@@ -41,7 +42,7 @@ with gr.Blocks() as app:
     gr.Markdown("""
 # HINet (or INR-Harmonization) - A novel image Harmonization method based on Implicit neural Networks
 ## Harmonize any image you want! Arbitrary resolution, and arbitrary aspect ratio! 
-### Official Gradio Demo
+### Official Gradio Demo. See here for [**How to play with this Space**](https://github.com/WindVChen/INR-Harmonization/blob/main/assets/demo.gif)
 **Since Gradio Space only support CPU, the speed may kind of slow. You may better download the code to run locally with a GPU.**
 <a href="https://huggingface.co/spaces/WindVChen/INR-Harmon?duplicate=true" style="display: inline-block;margin-top: .5em;margin-right: .25em;" target="_blank">
 <img style="margin-bottom: 0em;display: inline;margin-top: -.25em;" src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a> for no queue on your own hardware.</p>
@@ -59,9 +60,15 @@ with gr.Blocks() as app:
 
     })
     with gr.Row():
-        form_composite_image = gr.Image(label='Input Composite image', type='pil').style(height="auto")
-        form_mask_image = gr.Image(label='Input Mask image', type='pil', interactive=False).style(
-            height="auto")
+        with gr.Column():
+            form_composite_image = gr.Image(label='Input Composite image', type='pil').style(height="auto")
+            gr.Examples(examples=[os.path.join("demo", i) for i in os.listdir("demo") if "composite" in i],
+                        label="Composite Examples", inputs=form_composite_image, cache_examples=False)
+        with gr.Column():
+            form_mask_image = gr.Image(label='Input Mask image', type='pil', interactive=False).style(
+                height="auto")
+            gr.Examples(examples=[os.path.join("demo", i) for i in os.listdir("demo") if "mask" in i],
+                        label="Mask Examples", inputs=form_mask_image, cache_examples=False)
     with gr.Row():
         with gr.Column(scale=4):
             with gr.Row():
@@ -113,6 +120,7 @@ with gr.Blocks() as app:
                 height="auto")
             form_start_btn = gr.Button("Start Harmonization", interactive=False)
             form_reset_btn = gr.Button("Reset", interactive=True)
+            form_stop_btn = gr.Button("Stop", interactive=True)
 
 
     def on_change_form_composite_image(form_composite_image):
@@ -123,8 +131,8 @@ with gr.Blocks() as app:
 
     def on_change_form_mask_image(form_composite_image, form_mask_image):
         if form_mask_image is None:
-            return gr.update(interactive=False if form_composite_image is None else True), gr.update(
-                interactive=False), gr.update(interactive=False), gr.update(
+            return gr.update(interactive=False), gr.update(
+                interactive=False if form_composite_image is None else True), gr.update(interactive=False), gr.update(
                 interactive=False), gr.update(interactive=False), gr.update(value=None)
 
         if form_composite_image.size[:2] != form_mask_image.size[:2]:
@@ -190,7 +198,9 @@ with gr.Blocks() as app:
                                 form_split_res, form_split_num):
         log.log = io.BytesIO()
         if form_inference_mode == "Square Image":
-            from efficient_inference_for_square_image import parse_args, main_process
+            from efficient_inference_for_square_image import parse_args, main_process, global_state
+            global_state[0] = 1
+
             opt = parse_args()
             opt.transform_mean = [.5, .5, .5]
             opt.transform_var = [.5, .5, .5]
@@ -198,7 +208,7 @@ with gr.Blocks() as app:
             opt.split_resolution = form_split_res
             opt.save_path = None
             opt.workers = 0
-            opt.device = "cuda" if torch.cuda.is_available() else "cpu"
+            opt.device = "cpu"
 
             composite_image = np.asarray(form_composite_image)
             mask = np.asarray(form_mask_image)
@@ -211,7 +221,9 @@ with gr.Blocks() as app:
                 raise gr.Error("Patches too big. Try to reduce the `split_res`!")
 
         else:
-            from inference_for_arbitrary_resolution_image import parse_args, main_process
+            from inference_for_arbitrary_resolution_image import parse_args, main_process, global_state
+            global_state[0] = 1
+
             opt = parse_args()
             opt.transform_mean = [.5, .5, .5]
             opt.transform_var = [.5, .5, .5]
@@ -219,7 +231,7 @@ with gr.Blocks() as app:
             opt.split_num = int(form_split_num)
             opt.save_path = None
             opt.workers = 0
-            opt.device = "cuda" if torch.cuda.is_available() else "cpu"
+            opt.device = "cpu"
 
             composite_image = np.asarray(form_composite_image)
             mask = np.asarray(form_mask_image)
@@ -232,12 +244,20 @@ with gr.Blocks() as app:
                 raise gr.Error("Patches too big. Try to increase the `split_num`!")
 
 
-    form_start_btn.click(on_click_form_start_btn,
-                         inputs=[form_composite_image, form_mask_image, form_pretrained_dropdown, form_inference_mode,
-                                 form_split_res, form_split_num], outputs=[form_harmonized_image])
+    generate = form_start_btn.click(on_click_form_start_btn,
+                                    inputs=[form_composite_image, form_mask_image, form_pretrained_dropdown,
+                                            form_inference_mode,
+                                            form_split_res, form_split_num], outputs=[form_harmonized_image])
 
 
-    def on_click_form_reset_btn():
+    def on_click_form_reset_btn(form_inference_mode):
+        if form_inference_mode == "Square Image":
+            from efficient_inference_for_square_image import global_state
+            global_state[0] = 0
+        else:
+            from inference_for_arbitrary_resolution_image import global_state
+            global_state[0] = 0
+
         log.log = io.BytesIO()
         return gr.update(value=None), gr.update(value=None, interactive=True), gr.update(value=None,
                                                                                          interactive=False), gr.update(
@@ -245,7 +265,27 @@ with gr.Blocks() as app:
 
 
     form_reset_btn.click(on_click_form_reset_btn,
-                         inputs=None, outputs=[form_log, form_composite_image, form_mask_image, form_start_btn])
+                         inputs=[form_inference_mode],
+                         outputs=[form_log, form_composite_image, form_mask_image, form_start_btn], cancels=generate)
+
+
+    def on_click_form_stop(form_inference_mode):
+        if form_inference_mode == "Square Image":
+            from efficient_inference_for_square_image import global_state
+            global_state[0] = 0
+        else:
+            from inference_for_arbitrary_resolution_image import global_state
+            global_state[0] = 0
+
+        log.log = io.BytesIO()
+        return gr.update(value=None), gr.update(value=None, interactive=True), gr.update(value=None,
+                                                                                         interactive=False), gr.update(
+            interactive=False)
+
+
+    form_stop_btn.click(on_click_form_stop,
+                        inputs=[form_inference_mode],
+                        outputs=[form_log, form_composite_image, form_mask_image, form_start_btn], cancels=generate)
 
     gr.Markdown("""
         ## Quick Start
@@ -276,4 +316,4 @@ gr.close_all()
 
 app.queue(concurrency_count=1, max_size=200, api_open=False)
 
-app.launch(show_api=False, server_port=12345)
+app.launch(show_api=False)
