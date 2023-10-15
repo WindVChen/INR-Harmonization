@@ -293,8 +293,8 @@ python inference_for_arbitrary_resolution.py --split_num {split_num} --composite
 ## Results
 
 ![Metrics](assets/metrics.png#pic_center)
-![Metrics](assets/metrics3.png#pic_center)
-![Metrics](assets/metrics2.png#pic_center)
+![Metrics](assets/Metrics3.png#pic_center)
+![Metrics](assets/Metrics2.png#pic_center)
 ![Visual comparisons](assets/visualizations.png#pic_center)
 ![Visual comparisons2](assets/visualizations2.png#pic_center)
 
