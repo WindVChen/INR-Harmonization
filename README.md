@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1><a href="https://arxiv.org/abs/2303.01681">Dense Pixel-to-Pixel Harmonization via <br /> Continuous Image Representation</a></h1>
+<h1><a href="https://ieeexplore.ieee.org/document/10285123">Dense Pixel-to-Pixel Harmonization via <br /> Continuous Image Representation</a></h1>
 
 
 **[Jianqi Chen](https://windvchen.github.io/), [Yilan Zhang](https://scholar.google.com.hk/citations?hl=en&user=wZ4M4ecAAAAJ), [Zhengxia Zou](https://scholar.google.com.hk/citations?hl=en&user=DzwoyZsAAAAJ), [Keyan Chen](https://scholar.google.com.hk/citations?hl=en&user=5RF4ia8AAAAJ),
@@ -27,11 +27,15 @@ and [Zhenwei Shi](https://scholar.google.com.hk/citations?hl=en&user=kNhFWQIAAAA
 
 ### Share us a :star: if this repo does help
 
-This repository is the official implementation of ***HINet (or INR-Harmonization)***, which can achieve ***Arbitrary aspect ratio & Arbitrary resolution*** image harmonization. If you encounter any question, please feel free to contact
+This repository is the official implementation of ***HINet (or INR-Harmonization)***, which can achieve ***Arbitrary aspect ratio & Arbitrary resolution*** image harmonization. The newest version of the paper can be accessed in [[IEEE](https://ieeexplore.ieee.org/document/10285123)], the previous version of the paper can be accessed in [[arXiv](https://arxiv.org/abs/2303.01681)]. ***(Accepted by TCSVT 2023)***
+
+If you encounter any question, please feel free to contact
 us. You can create an issue or just send email to me windvchen@gmail.com. Also welcome for any idea exchange and
 discussion.
 
 ## Updates
+
+[**10/15/2023**] Our method now also generalizes well to video harmonization! We have released the training and inference code for video harmonization! 🚀🚀 Also with the pretrained weight on HYouTube dataset. More details please refer to [Requirements](#requirements), [Training](#training), [Evaluation](#evaluation), and [Results](#results) parts. Feel free to play with it! 🥳 What's more, this paper is finally accepted by **TCSVT**. 👋 You can find the newest version of paper (with more new results and experiments) [here](https://ieeexplore.ieee.org/document/10285123). For the previous version, please refer to [here](https://arxiv.org/abs/2303.01681).
 
 [**07/21/2023**] We achieve that!🎉🎉 With all **TODOs** complete! Try here for our [Huggingface Demo](https://huggingface.co/spaces/WindVChen/INR-Harmon)!! You can also download this repository, and run the GUI locally (refer to [cmd](#visualization-gui) here)!🥳🥳
 
@@ -149,21 +153,27 @@ applications of the proposed method are explored.
     - If you want to train and evaluate only on HAdobe5k subdataset (see Table 1 in the paper), you can modify
       the `IHD_train.txt` and `IHD_test.txt` in [train.py](train.py) to only contain the HAdobe5k images.
 
+    - (Advanced) We also support training on the video harmonization dataset. For this, you can download the video harmonization dataset from [HYouTube](https://github.com/bcmi/Video-Harmonization-Dataset-HYouTube/tree/master), then you need to modify
+      the `IHD_train.txt` and `IHD_test.txt` in [train.py](train.py) to `train_list.txt` and `test_list.txt`.
+
 3. Pre-trained Models
     - We adopt [HRNetV2](https://github.com/HRNet/HRNet-Image-Classification) as our encoder, you can download the
       weight
       from [here](https://onedrive.live.com/?authkey=%21AMkPimlmClRvmpw&id=F7FD0B7F26543CEB%21112&cid=F7FD0B7F26543CEB&parId=root&parQt=sharedby&parCid=C8304F01C1A85932&o=OneUp)
       and save the weight in `pretrained_models` directory.
     - In the following table, we provide several model weights pretrained under different resolutions (Correspond to
-      Table 1 in the paper):
+      Table 1 in the paper). We also provide the weight pretrained on HYouTube video harmonization dataset:
+      
+(Note that the provided model weights also contain other information, like the optimizer state, the epoch number, etc. Thus, it is larger than the actual model size.)
 
-|                      Download Link                       |                         Model Descriptions                          |
-|:--------------------------------------------------------:|:-------------------------------------------------------------------:|
-| [Resolution_RAW_iHarmony4.pth][Resolution_RAW_iHarmony4] |  Train by RSC strategy with original resolution iHarmony4 dataset   |
-| [Resolution_256_iHarmony4.pth][Resolution_256_iHarmony4] |           Train with 256*256 resolution iHarmony4 dataset           |
-|  [Resolution_RAW_HAdobe5K.pth][Resolution_RAW_HAdobe5K]  | Train by RSC strategy with original resolution HAdobe5k subdataset  |
-| [Resolution_2048_HAdobe5K.pth][Resolution_2048_HAdobe5K] | Train by RSC strategy with 2048*2048 resolution HAdobe5k subdataset |
-| [Resolution_1024_HAdobe5K.pth][Resolution_1024_HAdobe5K] | Train by RSC strategy with 1024*1024 resolution HAdobe5k subdataset |
+|                      Download Link                       |                                    Model Descriptions                                     |
+|:--------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|
+| [Resolution_RAW_iHarmony4.pth][Resolution_RAW_iHarmony4] |             Train by RSC strategy with original resolution iHarmony4 dataset              |
+| [Resolution_256_iHarmony4.pth][Resolution_256_iHarmony4] |                      Train with 256*256 resolution iHarmony4 dataset                      |
+|  [Resolution_RAW_HAdobe5K.pth][Resolution_RAW_HAdobe5K]  |            Train by RSC strategy with original resolution HAdobe5k subdataset             |
+| [Resolution_2048_HAdobe5K.pth][Resolution_2048_HAdobe5K] |            Train by RSC strategy with 2048*2048 resolution HAdobe5k subdataset            |
+| [Resolution_1024_HAdobe5K.pth][Resolution_1024_HAdobe5K] |            Train by RSC strategy with 1024*1024 resolution HAdobe5k subdataset            |
+| [Video_HYouTube_256.pth][Video_HYouTube_256] | Train on HYouTube video harmonization dataset with 256*256 resolution |
 
 [Resolution_RAW_iHarmony4]: https://drive.google.com/file/d/1O9faWNk54mIzMaGZ1tmgm0EJpH20a-Fl/view?usp=drive_link
 
@@ -174,6 +184,8 @@ applications of the proposed method are explored.
 [Resolution_2048_HAdobe5K]: https://drive.google.com/file/d/18RxTfZsPEoi6kSS_UVEsUBYRBHAl4MfB/view?usp=drive_link
 
 [Resolution_1024_HAdobe5K]: https://drive.google.com/file/d/1cOY74mN8gIz66watyoobZ1knrigkQyb5/view?usp=sharing
+
+[Video_HYouTube_256]: https://drive.google.com/file/d/1Tv9aahaPmJ_RGeYdawLCNWNGabZgJo6y/view?usp=sharing
 
 
 ## Training
@@ -194,6 +206,8 @@ python train.py --dataset_path {dataset_path} --base_size 256 --input_size 256 -
 - `isFullRes`: whether to train in full/original resolution mode.
 
 - (More parameters' information could be found in codes ...)
+
+(Advanced) If you want to train on HYouTube dataset, you need to replace [processing.py](processing.py) and [build_dataset.py](build_dataset.py) with the same-name files in [Video_Harmonization](Video_Harmonization) directory. Other settings are the same.
 
 ### Train in high resolution (HR) mode (E.g, 2048x2048)
 
@@ -228,6 +242,8 @@ which resolution the model is trained on. Please refer to Table 4 and Table 5 in
 ```bash
 python inference.py --dataset_path {dataset_path} --pretrained {pretrained_weight} --base_size 256 --input_size 256 --INR_input_size 256
 ```
+
+(Advanced) If you want to evaluate on HYouTube dataset, you need to replace [inferece.py](inference.py) with either [inference_normal.py](Video_Harmonization/inference_normal.py) or [inference_3D_LUT_Interpolation.py](Video_Harmonization/inference_3D_LUT_Interpolation.py) in [Video_Harmonization](Video_Harmonization) directory. Other settings are the same. [inference_3D_LUT_Interpolation.py](Video_Harmonization/inference_3D_LUT_Interpolation.py) is a faster version of [inference_normal.py](Video_Harmonization/inference_normal.py) which we leverage our proposed 3D LUT interpolation strategy. You can refer to Section V-C for more details.
 
 ### Evaluation in high resolution (HR) mode (E.g, 2048x2048)
 
@@ -277,6 +293,8 @@ python inference_for_arbitrary_resolution.py --split_num {split_num} --composite
 ## Results
 
 ![Metrics](assets/metrics.png#pic_center)
+![Metrics](assets/metrics3.png#pic_center)
+![Metrics](assets/metrics2.png#pic_center)
 ![Visual comparisons](assets/visualizations.png#pic_center)
 ![Visual comparisons2](assets/visualizations2.png#pic_center)
 
@@ -285,12 +303,16 @@ python inference_for_arbitrary_resolution.py --split_num {split_num} --composite
 If you find this paper useful in your research, please consider citing:
 
 ```
-@article{chen2023dense,
-  title={Dense Pixel-to-Pixel Harmonization via Continuous Image Representation},
+@article{10285123,
   author={Chen, Jianqi and Zhang, Yilan and Zou, Zhengxia and Chen, Keyan and Shi, Zhenwei},
-  journal={arXiv preprint arXiv:2303.01681},
-  year={2023}
-}
+  journal={IEEE Transactions on Circuits and Systems for Video Technology}, 
+  title={Dense Pixel-to-Pixel Harmonization via Continuous Image Representation}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-1},
+  doi={10.1109/TCSVT.2023.3324591}}
+
 ```
 
 ## License
