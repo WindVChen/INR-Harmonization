@@ -159,7 +159,7 @@ applications of the proposed method are explored.
 3. Pre-trained Models
     - We adopt [HRNetV2](https://github.com/HRNet/HRNet-Image-Classification) as our encoder, you can download the
       weight
-      from [here](https://onedrive.live.com/?authkey=%21AMkPimlmClRvmpw&id=F7FD0B7F26543CEB%21112&cid=F7FD0B7F26543CEB&parId=root&parQt=sharedby&parCid=C8304F01C1A85932&o=OneUp)
+      from [here](https://onedrive.live.com/?redeem=aHR0cHM6Ly8xZHJ2Lm1zL3UvcyFBdXM4VkNaX0NfMzNjTWtQaW1sbUNsUnZtcHc&cid=F7FD0B7F26543CEB&id=F7FD0B7F26543CEB%21112&parId=F7FD0B7F26543CEB%21105&o=OneUp)
       and save the weight in `pretrained_models` directory.
     - In the following table, we provide several model weights pretrained under different resolutions (Correspond to
       Table 1 in the paper). We also provide the weight pretrained on HYouTube video harmonization dataset:
